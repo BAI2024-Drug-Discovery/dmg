@@ -1,7 +1,0 @@
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = ["E501"]
-unfixable = ["F401"]
-
-[tool.ruff]
-line-length = 100
