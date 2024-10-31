@@ -1,4 +1,4 @@
-# drug-molecule-generation-with-VAE
+# Drug Molecule Generation with VAE
 
 This project implements a Variational Autoencoder (VAE) for generating drug molecules. The VAE model is designed to encode molecular structures into a latent space and decode them back into molecular structures. Additionally, the model predicts properties of the generated molecules.
 
