@@ -21,6 +21,21 @@ smiles_list = [smiles for smiles in smiles_list if Chem.MolFromSmiles(smiles) is
 
 # Build vocabulary
 def build_vocab(smiles_list):
+    """
+    Builds a vocabulary from a list of SMILES strings.
+
+    Args:
+        smiles_list (list of str): List of SMILES strings.
+
+    Returns:
+        tuple: A tuple containing:
+            - vocab (list of str): List of characters in the vocabulary including padding, start, and end tokens.
+            - char_to_idx (dict): Dictionary mapping characters to their corresponding indices in the vocabulary.
+            - idx_to_char (dict): Dictionary mapping indices to their corresponding characters in the vocabulary.
+            - start_token (str): The start token character.
+            - end_token (str): The end token character.
+            - pad_token (str): The padding token character.
+    """
     charset = set()
     for smiles in smiles_list:
         for char in smiles:
@@ -44,6 +59,20 @@ max_length = max([len(smiles) for smiles in smiles_list]) + 2  # +2 for start an
 
 
 def encode_smiles(smiles, char_to_idx, max_length, start_token, end_token, pad_token):
+    """
+    Encodes a SMILES string into a list of indices based on a character-to-index mapping.
+
+    Parameters:
+    smiles (str): The SMILES string to encode.
+    char_to_idx (dict): A dictionary mapping characters to their corresponding indices.
+    max_length (int): The maximum length of the encoded SMILES string. If the encoded string is shorter, it will be padded.
+    start_token (str): The token to prepend to the SMILES string.
+    end_token (str): The token to append to the SMILES string.
+    pad_token (str): The token used for padding the encoded SMILES string to the maximum length.
+
+    Returns:
+    list: A list of indices representing the encoded SMILES string, padded to the specified maximum length.
+    """
     smiles = start_token + smiles + end_token
     smiles_idx = [char_to_idx[char] for char in smiles]
     padding = [char_to_idx[pad_token]] * (max_length - len(smiles_idx))
@@ -85,6 +114,36 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # Encoder
 class Encoder(nn.Module):
+    """
+    Encoder module for a Variational Autoencoder (VAE) designed for drug molecule generation.
+
+    Args:
+        vocab_size (int): Size of the vocabulary.
+        embed_size (int): Size of the embedding vectors.
+        latent_dim (int): Dimensionality of the latent space.
+
+    Attributes:
+        embedding (nn.Embedding): Embedding layer that converts input tokens to dense vectors.
+        conv1 (nn.Conv1d): First 1D convolutional layer.
+        conv2 (nn.Conv1d): Second 1D convolutional layer.
+        conv3 (nn.Conv1d): Third 1D convolutional layer.
+        relu (nn.ReLU): ReLU activation function.
+        pool (nn.AdaptiveMaxPool1d): Adaptive max pooling layer.
+        fc_mu (nn.Linear): Fully connected layer to compute the mean of the latent space.
+        fc_logvar (nn.Linear): Fully connected layer to compute the log variance of the latent space.
+
+    Methods:
+        forward(x):
+            Forward pass through the encoder network.
+
+            Args:
+                x (torch.Tensor): Input tensor of shape [batch_size, seq_len].
+
+            Returns:
+                mu (torch.Tensor): Mean of the latent space of shape [batch_size, latent_dim].
+                logvar (torch.Tensor): Log variance of the latent space of shape [batch_size, latent_dim].
+    """
+
     def __init__(self, vocab_size, embed_size, latent_dim):
         super(Encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size, padding_idx=char_to_idx[pad_token])
@@ -110,6 +169,34 @@ class Encoder(nn.Module):
 
 # Decoder
 class Decoder(nn.Module):
+    """
+    A GRU-based decoder for generating sequences from latent vectors.
+
+    Args:
+        vocab_size (int): Size of the vocabulary.
+        embed_size (int): Dimensionality of the embeddings.
+        latent_dim (int): Dimensionality of the latent space.
+        max_length (int): Maximum length of the generated sequences.
+
+    Attributes:
+        latent_dim (int): Dimensionality of the latent space.
+        max_length (int): Maximum length of the generated sequences.
+        embedding (nn.Embedding): Embedding layer for input sequences.
+        gru (nn.GRU): GRU layer for sequence generation.
+        fc_out (nn.Linear): Fully connected layer to map GRU outputs to vocabulary size.
+
+    Methods:
+        forward(z, target_seq):
+            Generates sequences from the latent vector and target sequence.
+
+            Args:
+                z (torch.Tensor): Latent vector.
+                target_seq (torch.Tensor): Target sequence for teacher forcing.
+
+            Returns:
+                torch.Tensor: Output logits for each token in the sequence.
+    """
+
     def __init__(self, vocab_size, embed_size, latent_dim, max_length):
         super(Decoder, self).__init__()
         self.latent_dim = latent_dim
@@ -128,6 +215,21 @@ class Decoder(nn.Module):
 
 # Property Predictor
 class PropertyPredictor(nn.Module):
+    """
+    A neural network module for predicting properties from latent vectors.
+
+    Args:
+        latent_dim (int): The dimensionality of the latent space.
+
+    Methods:
+        forward(z):
+            Forward pass through the network.
+            Args:
+                z (torch.Tensor): A tensor containing the latent vectors.
+            Returns:
+                torch.Tensor: A tensor containing the predicted properties.
+    """
+
     def __init__(self, latent_dim):
         super(PropertyPredictor, self).__init__()
         self.fc1 = nn.Linear(latent_dim, 128)
@@ -142,6 +244,22 @@ class PropertyPredictor(nn.Module):
 
 # VAE Model
 class VAE(nn.Module):
+    """
+    Variational Autoencoder (VAE) class for drug molecule generation.
+    Attributes:
+        encoder (Encoder): The encoder network that maps input sequences to latent space.
+        decoder (Decoder): The decoder network that reconstructs sequences from latent space.
+        property_predictor (PropertyPredictor): The network that predicts properties from latent space.
+    Methods:
+        __init__(vocab_size, embed_size, latent_dim, max_length):
+            Initializes the VAE with the given parameters.
+        reparameterize(mu, logvar):
+            Applies the reparameterization trick to sample from the latent space.
+        forward(x):
+            Performs a forward pass through the VAE, encoding the input, sampling from the latent space,
+            decoding the latent representation, and predicting properties.
+    """
+
     def __init__(self, vocab_size, embed_size, latent_dim, max_length):
         super(VAE, self).__init__()
         self.encoder = Encoder(vocab_size, embed_size, latent_dim)
@@ -164,6 +282,19 @@ class VAE(nn.Module):
 
 # Loss Function
 def loss_function(recon_x, x, mu, logvar, property_pred, property_true):
+    """
+    Computes the loss for the VAE model, which includes reconstruction loss, KL divergence loss, and property prediction loss.
+    Args:
+        recon_x (torch.Tensor): The reconstructed output from the decoder.
+        x (torch.Tensor): The original input sequence.
+        mu (torch.Tensor): The mean of the latent variable distribution.
+        logvar (torch.Tensor): The log variance of the latent variable distribution.
+        property_pred (torch.Tensor): The predicted property values from the model.
+        property_true (torch.Tensor): The true property values.
+    Returns:
+        torch.Tensor: The computed loss value.
+    """
+
     batch_size = x.size(0)
     recon_x = recon_x.view(-1, vocab_size)
     x = x[:, 1:].contiguous().view(-1)
@@ -204,6 +335,18 @@ for epoch in range(num_epochs):
 
 # 4. Latent Space Optimization
 def optimize_latent_vector(model, initial_z, num_steps=100, lr=1e-2, target_property=None):
+    """
+    Optimizes a latent vector to maximize or match a target property using gradient descent.
+    Args:
+        model (torch.nn.Module): The model containing the property predictor.
+        initial_z (torch.Tensor): The initial latent vector to be optimized.
+        num_steps (int, optional): The number of optimization steps. Default is 100.
+        lr (float, optional): The learning rate for the optimizer. Default is 1e-2.
+        target_property (torch.Tensor, optional): The target property value to match. If None, the function will maximize the property.
+    Returns:
+        torch.Tensor: The optimized latent vector.
+    """
+
     z = initial_z.clone().detach().requires_grad_(True)
     optimizer = optim.Adam([z], lr=lr)
     for step in range(num_steps):  # noqa: B007
@@ -219,6 +362,15 @@ def optimize_latent_vector(model, initial_z, num_steps=100, lr=1e-2, target_prop
 
 
 def decode_latent_vector_sample(model, z):
+    """
+    Decodes a latent vector sample into a SMILES string using the provided VAE model.
+    Args:
+        model (torch.nn.Module): The VAE model used for decoding.
+        z (torch.Tensor): The latent vector sample to decode.
+    Returns:
+        str: The decoded SMILES string.
+    """
+
     model.eval()
     with torch.no_grad():
         batch_size = z.size(0)
