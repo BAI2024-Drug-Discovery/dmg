@@ -206,7 +206,7 @@ for epoch in range(num_epochs):
 def optimize_latent_vector(model, initial_z, num_steps=100, lr=1e-2, target_property=None):
     z = initial_z.clone().detach().requires_grad_(True)
     optimizer = optim.Adam([z], lr=lr)
-    for step in range(num_steps):
+    for step in range(num_steps):  # noqa: B007
         optimizer.zero_grad()
         property_pred = model.property_predictor(z)
         if target_property is not None:
