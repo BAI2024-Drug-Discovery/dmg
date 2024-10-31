@@ -44,9 +44,9 @@ The `VAE` class combines the encoder, decoder, and property predictor to form th
 
 ## Relevant Links
 
-https://keras.io/examples/generative/molecule_generation/
+<https://keras.io/examples/generative/molecule_generation/>
 
-https://huggingface.co/keras-io/drug-molecule-generation-with-VAE
+<https://huggingface.co/keras-io/drug-molecule-generation-with-VAE>
 
 ## Relevant Papers
 
