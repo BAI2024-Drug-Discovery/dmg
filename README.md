@@ -4,11 +4,19 @@ This project implements a Variational Autoencoder (VAE) for generating drug mole
 
 ## Setup
 
-### Conda Environment
+### Environment
+
+First create new virtual environment.
 
 ```bash
-conda env create -f env.yml
-conda activate dmgwvae
+python -m venv .venv
+sourcen .venv/bin/activate
+
+# For CUDA usage
+pip install -r requirements.txt
+
+# For CPU usage
+pip install -r requirements_cpu.txt
 ```
 
 ### Dependencies
