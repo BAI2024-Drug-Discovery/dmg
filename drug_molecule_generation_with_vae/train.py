@@ -1,18 +1,20 @@
 import os
 
 import torch
-from data.data_loader import load_smiles
-from models.vae import VAE
 from torch.utils.data import DataLoader, TensorDataset
-from utils.compute_properties import compute_property
-from utils.config import Config
-from utils.loss_function import loss_function
-from utils.smiles_processing import build_vocab, encode_smiles
+
+from .data.data_loader import load_smiles
+from .models.vae import VAE
+from .utils.compute_properties import compute_property
+from .utils.config import Config
+from .utils.loss_function import loss_function
+from .utils.smiles_processing import build_vocab, encode_smiles
 
 
 def train(data_path, output_dir):
     config = Config()
     smiles_list = load_smiles(data_path)
+    property_list = [compute_property(smiles) for smiles in smiles_list]
     vocab, char_to_idx, idx_to_char, start_token, end_token, pad_token = build_vocab(smiles_list)
     vocab_size = len(vocab)
     max_length = max([len(smiles) for smiles in smiles_list]) + 2
@@ -21,8 +23,7 @@ def train(data_path, output_dir):
         for smiles in smiles_list
     ]
     encoded_smiles = torch.tensor(encoded_smiles, dtype=torch.long)
-    properties = [compute_property(smiles) for smiles in smiles_list]
-    properties = torch.tensor(properties, dtype=torch.float32)
+    properties = torch.tensor(property_list, dtype=torch.float32)
     dataset = TensorDataset(encoded_smiles, properties)
     dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
     model = VAE(
