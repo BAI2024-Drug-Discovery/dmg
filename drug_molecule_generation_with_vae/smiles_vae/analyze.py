@@ -7,6 +7,8 @@ import seaborn as sns
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
+from drug_molecule_generation_with_vae.smiles_vae.data.data_loader import load_smiles
+
 
 def calculate_qed(smiles):
     """
@@ -40,6 +42,20 @@ def calculate_logp(smiles):
     return Descriptors.MolLogP(mol)
 
 
+def is_significant(p_value, alpha=0.05):
+    """
+    Determine if the p-value is statistically significant.
+
+    Args:
+        p_value (float): The p-value from a statistical test.
+        alpha (float): The significance level.
+
+    Returns:
+        bool: True if the p-value is less than the significance level, False otherwise.
+    """
+    return p_value < alpha
+
+
 def analyze(generated_data_path, training_data_path):
     """
     Analyze the generated molecules by comparing them with the training data.
@@ -56,8 +72,9 @@ def analyze(generated_data_path, training_data_path):
     df_generated['QED'] = df_generated['Generated_SMILES'].apply(calculate_qed)
     df_generated['LogP'] = df_generated['Generated_SMILES'].apply(calculate_logp)
 
-    # Load training data
-    df_training = pd.read_csv(training_data_path)
+    # Load training data from the original dataset (smi file)
+    training_smiles = load_smiles(training_data_path)
+    df_training = pd.DataFrame(training_smiles, columns=['SMILES'])
     df_training['QED'] = df_training['SMILES'].apply(calculate_qed)
     df_training['LogP'] = df_training['SMILES'].apply(calculate_logp)
 
@@ -84,8 +101,8 @@ def analyze(generated_data_path, training_data_path):
     ks_stat_logp, p_value_logp = stats.ks_2samp(
         df_training['LogP'].dropna(), df_generated['LogP'].dropna()
     )
-    output += f'\nQED KS test statistic: {ks_stat_qed:.4f}, p-value: {p_value_qed:.4e}'
-    output += f'\nLogP KS test statistic: {ks_stat_logp:.4f}, p-value: {p_value_logp:.4e}'
+    output += f'\nQED KS test statistic: {ks_stat_qed:.4f}, p-value: {p_value_qed:.4e}, significant: {is_significant(p_value_qed)}'
+    output += f'\nLogP KS test statistic: {ks_stat_logp:.4f}, p-value: {p_value_logp:.4e}, significant: {is_significant(p_value_logp)}'
 
     print(output)
 
@@ -93,6 +110,15 @@ def analyze(generated_data_path, training_data_path):
     output_dir = os.path.dirname(generated_data_path)
     with open(os.path.join(output_dir, 'analysis_results.txt'), 'w') as f:
         f.write(output)
+
+    # Plot the statistical test results
+    plt.figure(figsize=(10, 6))
+    plt.bar(['QED', 'LogP'], [ks_stat_qed, ks_stat_logp], color=['blue', 'green'])
+    plt.xlabel('Descriptor')
+    plt.ylabel('KS Test Statistic')
+    plt.title('KS Test Statistics for QED and LogP')
+    plt.savefig(os.path.join(output_dir, 'ks_test_statistics.png'))
+    plt.close()
 
     # Plot QED distribution
     plt.figure(figsize=(10, 6))
