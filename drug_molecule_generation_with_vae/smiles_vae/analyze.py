@@ -9,6 +9,15 @@ from rdkit.Chem import Descriptors
 
 
 def calculate_qed(smiles):
+    """
+    Calculate the Quantitative Estimate of Drug-likeness (QED) for a given SMILES string.
+
+    Parameters:
+    smiles (str): A string representing the SMILES notation of the molecule.
+
+    Returns:
+    float or None: The QED value of the molecule if the SMILES string is valid, otherwise None.
+    """
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
@@ -16,13 +25,32 @@ def calculate_qed(smiles):
 
 
 def calculate_logp(smiles):
+    """
+    Calculate the logarithm of the partition coefficient (logP) for a given SMILES string.
+
+    Parameters:
+    smiles (str): A string representing the SMILES notation of the molecule.
+
+    Returns:
+    float or None: The logP value of the molecule if the SMILES string is valid, otherwise None.
+    """
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
     return Descriptors.MolLogP(mol)
 
 
-def analyze_generated_molecules(generated_data_path, training_data_path):
+def analyze(generated_data_path, training_data_path):
+    """
+    Analyze the generated molecules by comparing them with the training data.
+
+    Args:
+        generated_data_path (str): Path to the CSV file containing the generated molecules.
+        training_data_path (str): Path to the CSV file containing the training data.
+
+    Returns:
+        None
+    """
     # Load generated molecules
     df_generated = pd.read_csv(generated_data_path)
     df_generated['QED'] = df_generated['Generated_SMILES'].apply(calculate_qed)

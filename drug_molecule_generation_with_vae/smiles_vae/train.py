@@ -12,6 +12,16 @@ from .utils.smiles_processing import build_vocab, encode_smiles
 
 
 def train(data_path, output_dir):
+    """
+    Trains a Variational Autoencoder (VAE) model on SMILES data.
+
+    Args:
+        data_path (str): Path to the file containing SMILES strings.
+        output_dir (str): Directory where the trained model and related information will be saved.
+
+    Returns:
+        None
+    """
     config = Config()
     smiles_list = load_smiles(data_path)
     property_list = [compute_property(smiles) for smiles in smiles_list]

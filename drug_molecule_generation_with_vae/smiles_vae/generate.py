@@ -3,7 +3,6 @@ import os
 import pandas as pd
 import torch
 from rdkit import Chem
-from rdkit.Chem import Descriptors
 
 from .models.vae import VAE
 from .utils.compute_properties import compute_property
@@ -12,6 +11,17 @@ from .utils.optimization import decode_latent_vector_sample, optimize_latent_vec
 
 
 def generate(num_molecules, model_dir, output_path) -> dict:
+    """
+    Generates a specified number of molecular structures using a trained VAE model and saves the results to a CSV file.
+
+    Args:
+        num_molecules (int): The number of molecules to generate.
+        model_dir (str): The directory where the trained VAE model and associated files are stored.
+        output_path (str): The file path where the generated molecules and their properties will be saved as a CSV file.
+
+    Returns:
+        dict: A dictionary containing the generated SMILES strings, their validity, and QED properties.
+    """
     config = Config()
     model_info = torch.load(os.path.join(model_dir, 'model_info.pth'), weights_only=True)
     vocab = model_info['vocab']
