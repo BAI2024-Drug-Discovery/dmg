@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 import torch
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -10,7 +11,7 @@ from .utils.config import Config
 from .utils.optimization import decode_latent_vector_sample, optimize_latent_vector
 
 
-def generate(num_molecules, model_dir) -> dict:
+def generate(num_molecules, model_dir, output_path) -> dict:
     config = Config()
     model_info = torch.load(os.path.join(model_dir, 'model_info.pth'), weights_only=True)
     vocab = model_info['vocab']
@@ -38,5 +39,9 @@ def generate(num_molecules, model_dir) -> dict:
         data['Generated_SMILES'].append(smiles)
         data['Validity'].append(valid)
         data['QED'].append(properties)
+
+    df = pd.DataFrame(data)
+    df.to_csv(output_path, index=False)
+    print(f'Generated molecules saved to {output_path}')
 
     return data
