@@ -7,7 +7,7 @@ import seaborn as sns
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
-from drug_molecule_generation_with_vae.smiles_vae.data.data_loader import load_smiles
+from dmg.smiles_vae.data.data_loader import load_smiles
 
 
 def calculate_qed(smiles):

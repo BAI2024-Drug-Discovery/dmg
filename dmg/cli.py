@@ -1,11 +1,11 @@
 import click
 from rdkit import RDLogger
 
-from drug_molecule_generation_with_vae.smiles_vae.analyze import (
+from dmg.smiles_vae.analyze import (
     analyze as smiles_analyze,
 )
-from drug_molecule_generation_with_vae.smiles_vae.generate import generate as smiles_generate
-from drug_molecule_generation_with_vae.smiles_vae.train import train as smiles_train
+from dmg.smiles_vae.generate import generate as smiles_generate
+from dmg.smiles_vae.train import train as smiles_train
 
 RDLogger.DisableLog('rdApp.*')
 
@@ -16,12 +16,12 @@ def cli():
 
 
 @click.group()
-def smiles():
+def smilesVAE():
     """Commands related to SMILES representation of molecules."""
     pass
 
 
-@smiles.command()
+@smilesVAE.command()
 @click.option('--data_path', required=True, help='Path to the molecules CSV file')
 @click.option(
     '--output_dir', required=True, help='Directory to save the trained model and information'
@@ -31,7 +31,7 @@ def train(data_path, output_dir):
     smiles_train(data_path, output_dir)
 
 
-@smiles.command()
+@smilesVAE.command()
 @click.option('--num_molecules', default=100, help='Number of molecules to generate')
 @click.option('--model_dir', required=True, help='Directory containing the model and information')
 @click.option('--output_path', required=True, help='Path to save the generated molecules CSV file')
@@ -40,7 +40,7 @@ def generate(num_molecules, model_dir, output_path):
     smiles_generate(num_molecules, model_dir, output_path)
 
 
-@smiles.command()
+@smilesVAE.command()
 @click.option(
     '--generated_data_path', required=True, help='Path to the generated molecules CSV file'
 )
@@ -56,7 +56,7 @@ def graph():
     pass
 
 
-cli.add_command(smiles)
+cli.add_command(smilesVAE)
 cli.add_command(graph)
 
 
