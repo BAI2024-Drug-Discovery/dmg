@@ -50,15 +50,7 @@ def analyze(generated_data_path, training_data_path):
     smiles_analyze(generated_data_path, training_data_path)
 
 
-@click.group()
-def graph():
-    """Commands related to graph representation of molecules."""
-    pass
-
-
 cli.add_command(smilesVAE)
-cli.add_command(graph)
-
 
 if __name__ == '__main__':
     cli()
