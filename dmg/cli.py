@@ -16,12 +16,12 @@ def cli():
 
 
 @click.group()
-def smilesVAE():
+def smilesvae():
     """Commands related to SMILES representation of molecules."""
     pass
 
 
-@smilesVAE.command()
+@smilesvae.command()
 @click.option('--data_path', required=True, help='Path to the molecules CSV file')
 @click.option(
     '--output_dir', required=True, help='Directory to save the trained model and information'
@@ -31,7 +31,7 @@ def train(data_path, output_dir):
     smiles_train(data_path, output_dir)
 
 
-@smilesVAE.command()
+@smilesvae.command()
 @click.option('--num_molecules', default=100, help='Number of molecules to generate')
 @click.option('--model_dir', required=True, help='Directory containing the model and information')
 @click.option('--output_path', required=True, help='Path to save the generated molecules CSV file')
@@ -40,7 +40,7 @@ def generate(num_molecules, model_dir, output_path):
     smiles_generate(num_molecules, model_dir, output_path)
 
 
-@smilesVAE.command()
+@smilesvae.command()
 @click.option(
     '--generated_data_path', required=True, help='Path to the generated molecules CSV file'
 )
@@ -50,7 +50,7 @@ def analyze(generated_data_path, training_data_path):
     smiles_analyze(generated_data_path, training_data_path)
 
 
-cli.add_command(smilesVAE)
+cli.add_command(smilesvae)
 
 if __name__ == '__main__':
     cli()
