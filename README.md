@@ -12,24 +12,13 @@ First create new virtual environment.
 python -m venv .venv
 sourcen .venv/bin/activate
 
-# For CUDA usage
-pip install -r requirements.txt
-
-# For CPU usage
-pip install -r requirements_cpu.txt
+pip install .
 ```
-
-### Dependencies
-
-- PyTorch
-- RDKit
-- NumPy
-- Pandas
 
 ## Usage
 
 ```bash
-python drug_molecule_generation_with_vae/main.py
+dmg --help
 ```
 
 ## Model Architecture
