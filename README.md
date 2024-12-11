@@ -21,24 +21,6 @@ pip install .
 dmg --help
 ```
 
-## Model Architecture
-
-### Encoder
-
-The `Encoder` class encodes input sequences into a latent space.
-
-### Decoder
-
-The `Decoder` class decodes latent vectors back into molecular sequences.
-
-### Property Predictor
-
-The `PropertyPredictor` class predicts properties from latent vectors.
-
-### VAE
-
-The `VAE` class combines the encoder, decoder, and property predictor to form the complete VAE model.
-
 ## Relevant Links
 
 <https://keras.io/examples/generative/molecule_generation/>
