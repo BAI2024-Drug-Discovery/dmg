@@ -10,8 +10,7 @@ First create new virtual environment.
 
 ```bash
 python -m venv .venv
-sourcen .venv/bin/activate
-
+source .venv/bin/activate
 pip install .
 ```
 
