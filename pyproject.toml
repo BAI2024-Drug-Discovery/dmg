@@ -1,0 +1,25 @@
+[project]
+name = "dmg"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1.7",
+    "matplotlib>=3.9.3",
+    "pandas>=2.2.3",
+    "rdkit>=2024.3.6",
+    "scipy>=1.14.1",
+    "seaborn>=0.13.2",
+    "torch>=2.5.1",
+]
+
+[project.scripts]
+dmg = "dmg.cli:cli"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dmg"]

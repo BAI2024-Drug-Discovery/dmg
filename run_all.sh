@@ -6,10 +6,10 @@ MODEL_DIR="output/vae_model"
 GENERATED_DATA_PATH="output/generated_molecules.csv"
 
 # Step 1: Train the model
-dmg smilesVAE train --data_path $DATA_PATH --output_dir $MODEL_DIR
+dmg smilesvae train --data_path $DATA_PATH --output_dir $MODEL_DIR
 
 # Step 2: Generate molecules
-dmg smilesVAE generate --num_molecules 500 --model_dir $MODEL_DIR --output_path $GENERATED_DATA_PATH
+dmg smilesvae generate --num_molecules 500 --model_dir $MODEL_DIR --output_path $GENERATED_DATA_PATH
 
 # Step 3: Analyze generated molecules
-dmg smilesVAE analyze --generated_data_path $GENERATED_DATA_PATH --training_data_path $DATA_PATH
+dmg smilesvae analyze --generated_data_path $GENERATED_DATA_PATH --training_data_path $DATA_PATH
