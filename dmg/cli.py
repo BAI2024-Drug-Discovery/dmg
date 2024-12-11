@@ -1,11 +1,11 @@
 import click
 from rdkit import RDLogger
 
-from dmg.smiles_vae.analyze import (
+from .smiles_vae.analyze import (
     analyze as smiles_analyze,
 )
-from dmg.smiles_vae.generate import generate as smiles_generate
-from dmg.smiles_vae.train import train as smiles_train
+from .smiles_vae.generate import generate as smiles_generate
+from .smiles_vae.train import train as smiles_train
 
 RDLogger.DisableLog('rdApp.*')
 
