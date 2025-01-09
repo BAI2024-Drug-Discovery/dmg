@@ -24,6 +24,8 @@ dmg --help
 
 <https://keras.io/examples/generative/molecule_generation/>
 
+<https://raw.githubusercontent.com/aspuru-guzik-group/chemical_vae/master/models/zinc_properties/250k_rndm_zinc_drugs_clean_3.csv>
+
 <https://huggingface.co/keras-io/drug-molecule-generation-with-VAE>
 
 ## Relevant Papers
