@@ -42,6 +42,22 @@ def calculate_logp(smiles):
     return Descriptors.MolLogP(mol)
 
 
+def calculate_molecular_weight(smiles):
+    """
+    Calculate the molecular weight for a given SMILES string.
+
+    Parameters:
+    smiles (str): A string representing the SMILES notation of the molecule.
+
+    Returns:
+    float or None: The molecular weight of the molecule if the SMILES string is valid, otherwise None.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return None
+    return Descriptors.MolWt(mol)
+
+
 def is_significant(p_value, alpha=0.05):
     """
     Determine if the p-value is statistically significant.
@@ -71,12 +87,16 @@ def analyze(generated_data_path, training_data_path):
     df_generated = pd.read_csv(generated_data_path)
     df_generated['QED'] = df_generated['Generated_SMILES'].apply(calculate_qed)
     df_generated['LogP'] = df_generated['Generated_SMILES'].apply(calculate_logp)
+    df_generated['MolecularWeight'] = df_generated['Generated_SMILES'].apply(
+        calculate_molecular_weight
+    )
 
     # Load training data from the original dataset (smi file)
     training_smiles = load_smiles(training_data_path)
     df_training = pd.DataFrame(training_smiles, columns=['SMILES'])
     df_training['QED'] = df_training['SMILES'].apply(calculate_qed)
     df_training['LogP'] = df_training['SMILES'].apply(calculate_logp)
+    df_training['MolecularWeight'] = df_training['SMILES'].apply(calculate_molecular_weight)
 
     num_generated = len(df_generated)
     output = f'Generated molecules: {num_generated}'
@@ -101,8 +121,12 @@ def analyze(generated_data_path, training_data_path):
     ks_stat_logp, p_value_logp = stats.ks_2samp(
         df_training['LogP'].dropna(), df_generated['LogP'].dropna()
     )
+    ks_stat_mw, p_value_mw = stats.ks_2samp(
+        df_training['MolecularWeight'].dropna(), df_generated['MolecularWeight'].dropna()
+    )
     output += f'\nQED KS test statistic: {ks_stat_qed:.4f}, p-value: {p_value_qed:.4e}, significant: {is_significant(p_value_qed)}'
     output += f'\nLogP KS test statistic: {ks_stat_logp:.4f}, p-value: {p_value_logp:.4e}, significant: {is_significant(p_value_logp)}'
+    output += f'\nMolecular Weight KS test statistic: {ks_stat_mw:.4f}, p-value: {p_value_mw:.4e}, significant: {is_significant(p_value_mw)}'
 
     print(output)
 
@@ -113,10 +137,10 @@ def analyze(generated_data_path, training_data_path):
 
     # Plot the statistical test results
     plt.figure(figsize=(10, 6))
-    plt.bar(['QED', 'LogP'], [ks_stat_qed, ks_stat_logp], color=['blue', 'green'])
+    plt.bar(['QED', 'LogP', 'Molecular Weight'], [ks_stat_qed, ks_stat_logp, ks_stat_mw])
     plt.xlabel('Descriptor')
     plt.ylabel('KS Test Statistic')
-    plt.title('KS Test Statistics for QED and LogP')
+    plt.title('KS Test Statistics for QED, LogP, and Molecular Weight')
     plt.savefig(os.path.join(output_dir, 'ks_test_statistics.png'))
     plt.close()
 
@@ -140,4 +164,15 @@ def analyze(generated_data_path, training_data_path):
     plt.title('LogP Distribution')
     plt.legend()
     plt.savefig(os.path.join(output_dir, 'logp_distribution.png'))
+    plt.close()
+
+    # Plot Molecular Weight distribution
+    plt.figure(figsize=(10, 6))
+    sns.kdeplot(df_training['MolecularWeight'], label='Training Set', fill=True)
+    sns.kdeplot(df_generated['MolecularWeight'].dropna(), label='Generated Molecules', fill=True)
+    plt.xlabel('Molecular Weight')
+    plt.ylabel('Density')
+    plt.title('Molecular Weight Distribution')
+    plt.legend()
+    plt.savefig(os.path.join(output_dir, 'molecular_weight_distribution.png'))
     plt.close()
