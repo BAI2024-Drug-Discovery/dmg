@@ -62,7 +62,7 @@ def train(data_path, output_dir):
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-        print(f'Epoch {epoch+1}, Loss: {total_loss / len(dataloader)}')
+        print(f'Epoch {epoch + 1}, Loss: {total_loss / len(dataloader)}')
     os.makedirs(output_dir, exist_ok=True)
     torch.save(model.state_dict(), os.path.join(output_dir, 'vae_model.pth'))
     torch.save(
@@ -77,4 +77,4 @@ def train(data_path, output_dir):
         },
         os.path.join(output_dir, 'model_info.pth'),
     )
-    print(f'Model and information saved in {output_dir}')
+    print(f'Model and information saved in "{output_dir}"')
